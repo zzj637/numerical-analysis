@@ -1,0 +1,203 @@
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{geometry}
+\geometry{a4paper, left=3cm, right=3cm, top=2.5cm, bottom=2.5cm}
+
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{algorithm, algorithmic}
+\floatname{algorithm}{算法}
+\renewcommand{\algorithmicrequire}{\textbf{输入:}}
+\renewcommand{\algorithmicensure}{\textbf{输出:}}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks, citecolor=black, filecolor=black, linkcolor=black, urlcolor=black}
+\usepackage{booktabs}
+% 代码样式
+\lstset{
+    language=C++,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    basicstyle=\ttfamily\small,
+    frame=single,
+    breaklines=true,
+    extendedchars=false
+}
+
+\title{第七次上机作业}
+\author{学号：241830137\quad 姓名：朱子健}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+实现快速傅里叶变换 FFT，并应用于某个具体场景。如信号，图像，声音处理，多项
+式乘法，偏微分方程求解 (谱方法)，或其它应用场景。
+
+\section{算法原理与设计}
+\subsection{算法原理}
+\subsubsection{快速傅里叶变换}
+离散Fourier变换（或逆变换）可以归结为计算
+\[
+c_{k} = \sum_{j=0}^{N-1}x_{j}\omega^{kj}    (k = 0, 1, \cdots,N-1)
+\]
+其中\[\omega = e^{-i\frac{2\pi}{N}}\]或\[\omega = e^{i\frac{2\pi}{N}}\],${x_{j}}(j = 0, 1, \cdots,N-1)$为已知复数序列. 计算全部 $c_{k}$ 共需 $N^{2}$ 个
+操作. 当 $N $很大时计算量也很大, 直到上个世纪 60 年代中期 Cooley \& Tukey 提出了快
+速傅里叶变换(FFT)算法, 可将计算工作量降到大约$O(NlogN)$, 才大大提高了运算
+速度。
+FFT算法的基本思想是尽量减少乘法的次数, 例如 $ab + ac + ad = a(b + c + d)$, 左端三次乘法而右端只用一次乘法. 实际上$e^{i\frac{2\pi}{N}j}(k, j = 0, 1, \cdots,N-1)$只有$N$个不同的值.特别是$N = 2^{P}$时只有$\frac{N}{2}$个不同的值。因此在计算$c_{k}$时, 可合并
+大量同因子的项, 从而减少乘法次数.
+\subsubsection{用快速傅里叶变换实现多项式乘法}
+设两个多项式
+\[
+A(x)=a_0+a_1x+\cdots+a_{n-1}x^{n-1},\qquad 
+B(x)=b_0+b_1x+\cdots+b_{m-1}x^{m-1},
+\]
+其乘积 \(C(x)=A(x)\cdot B(x)\) 的系数为卷积：
+\[
+c_k=\sum_{i=0}^{k}a_i b_{k-i},\quad k=0,1,\dots,n+m-2.
+\]
+直接计算的时间复杂度为 \(O(nm)\)。利用快速傅里叶变换（FFT）可降至 \(O(N\log N)\)，其中 \(N\) 为不小于 \(n+m-1\) 的 \(2\) 的幂。核心依据是\textbf{卷积定理}：
+\[
+\mathcal{F}\{A * B\} = \mathcal{F}\{A\} \cdot \mathcal{F}\{B\},
+\]
+即在点值表示下，多项式乘积对应点值逐点相乘。
+
+
+\subsubsection{算法设计}
+\begin{algorithm}[H]
+\caption{快速傅里叶变换实现方法}
+\begin{algorithmic}[1]
+    \STATE Step 1 给出复数数组 \( A_0(N), A_1(N) \) 及 \( w \left( \frac{N}{2} \right) \)，确定 \( P, q = 1 \)。将已知数据 \(\{x_j\}\) 输入到数组 \( A_0(N) \) 的单元中。
+    \STATE Step 2 计算 \( w^m = e^{-i\frac{2\pi}{N}m} \)（或 \( w^m = e^{i\frac{2\pi}{N}m} \)）（\( m \) 从 0 到 \( 2^{P-1}-1 \)），结果存放在 \( w\left(\frac{N}{2}\right) \) 的相应单元中。
+    \STATE Step 3 \( j \) 从 0 到 \( (2^{P-q}-1) \)，\( k \) 从 0 到 \( (2^{q-1}-1) \)，按 FFT 公式(3.5.15)计算 \( A_q \)，结果放在 \( A_1(N) \) 的相应单元中。
+    \STATE \[
+    \begin{cases}
+        A_1(j2^q + k) = A_0(j2^{q-1} + k) + A_0(j2^{q-1} + k + 2^{P-1}) \\
+        A_1(j2^q + k + 2^{q-1}) = [A_0(j2^{q-1} + k) - A_0(j2^{q-1} + k + 2^{P-1})]w(j2^{q-1})
+    \end{cases}
+    \]
+    \STATE Step 4 \( k, j \) 循环结束，\( q+1 \to q, A_1(N) \to A_0(N) \)。
+    \STATE 若 \( q < P \)，则 goto Step 3；否则 goto Step 5。
+    \STATE Step 5 此时 \( q = P, j = 0 \)，\( k \) 从 0 到 \( (2^{P-1}-1) \)。计算
+    \STATE \[
+    \begin{cases}
+        A_1(k) = A_0(k) + A_0(k + 2^{P-1}) \\
+        A_1(k + 2^{q-1}) = A_0(k) - A_0(k + 2^{P-1})
+    \end{cases}
+    \]
+    \STATE 这里得到的 \( A_1(k)(k = 0, 1, \dots, 2^{P-1}) \) 即为所求 \( c_k \)。
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{快速傅里叶变换实现多项式乘法}
+\begin{algorithmic}[1]
+    \REQUIRE 多项式 $A(x)=\sum_{i=0}^{n-1} a_i x^i$，$B(x)=\sum_{j=0}^{m-1} b_j x^j$，系数为整数或实数
+    \ENSURE 乘积多项式 $C(x)=A(x)B(x)=\sum_{k=0}^{n+m-2} c_k x^k$ 的系数数组 $c[0..n+m-2]$
+    \STATE 令 $L = n + m - 1$，$N = 2^{\lceil \log_2 L \rceil}$  
+    \STATE 构造数组 $A_{\text{pad}}[0..N-1]$，$B_{\text{pad}}[0..N-1]$，初值为0
+    \FOR{$i=0$ 至 $n-1$} \STATE $A_{\text{pad}}[i] \gets a_i$ \ENDFOR
+    \FOR{$j=0$ 至 $m-1$} \STATE $B_{\text{pad}}[j] \gets b_j$ \ENDFOR
+    \STATE $\hat{A} \gets \text{FFT}(A_{\text{pad}})$  
+    \STATE $\hat{B} \gets \text{FFT}(B_{\text{pad}})$
+    \FOR{$k=0$ 至 $N-1$} \STATE $\hat{C}[k] \gets \hat{A}[k] \cdot \hat{B}[k]$ \ENDFOR
+    \STATE $C_{\text{pad}} \gets \text{IFFT}(\hat{C})$  
+    \FOR{$k=0$ 至 $L-1$}
+        \STATE $c_k \gets \text{round}\bigl(\operatorname{Re}(C_{\text{pad}}[k])\bigr)$ 
+    \ENDFOR
+    \STATE \RETURN $c[0..L-1]$
+\end{algorithmic}
+\end{algorithm}
+
+\section{结果分析}
+
+\begin{table}[htbp]
+\centering
+\caption{FFT 多项式乘法示例}
+\begin{tabular}{|c|l|l|l|}
+\hline
+编号 & 多项式 A(x) & 多项式 B(x) & 乘积 C(x) \\
+\hline
+1 & $1+2x+3x^2$ & $4+5x+6x^2$ & $4+13x+28x^2+27x^3+18x^4$ \\
+\hline
+2 & $1-x+x^2-x^3$ & $1+x+x^2+x^3$ & $1 - x^6$ \\
+\hline
+3 & $\sum_{i=0}^{9}(i+1)x^i$ & $\sum_{i=0}^{9}(i+1)x^i$ & \begin{tabular}[t]{@{}l@{}} $1+4x+10x^2+20x^3+35x^4+56x^5+84x^6$\\ $+120x^7+165x^8+220x^9+276x^{10}+324x^{11}+360x^{12}$\\ $+380x^{13}+380x^{14}+360x^{15}+324x^{16}+276x^{17}$\\ $+220x^{18}+165x^{19}+120x^{20}+84x^{21}+56x^{22}$\\ $+35x^{23}+20x^{24}+10x^{25}+4x^{26}+x^{27}$ \end{tabular} \\
+\hline
+4 & $2+3x+5x^2+7x^3$ & $11+13x+17x^2+19x^3$ & $22+59x+128x^2+254x^3+317x^4+337x^5+254x^6+133x^7$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{附录: Python 源代码实现}
+\begin{lstlisting}[language=Python]
+import math, cmath
+def fft(a, invert):
+    n = len(a)
+    if n == 1:
+        return a
+    # 分治：奇偶下标
+    even = fft(a[0::2], invert)
+    odd  = fft(a[1::2], invert)
+    # 合并
+    ang = 2 * math.pi / n * (-1 if invert else 1)
+    w = 1
+    wn = complex(math.cos(ang), math.sin(ang))
+    for i in range(n // 2):
+        t = w * odd[i]
+        a[i] = even[i] + t
+        a[i + n//2] = even[i] - t
+        w *= wn
+    if invert:
+        for i in range(n):
+            a[i] /= n
+    return a
+
+def poly_mul_fft(a, b):
+    n = 1
+    while n < len(a) + len(b) - 1:
+        n <<= 1
+    fa = a + [0] * (n - len(a))
+    fb = b + [0] * (n - len(b))
+    fft(fa, False)
+    fft(fb, False)
+    for i in range(n):
+        fa[i] *= fb[i]
+    fft(fa, True)
+    return [int(round(fa[i].real)) for i in range(len(a) + len(b) - 1)]
+\end{lstlisting}
+\begin{lstlisting}
+import numpy as np
+def poly_mul_fft(a, b):
+    total_len = len(a) + len(b) - 1
+    n = 1
+    while n < total_len:
+        n <<= 1
+    fa = np.fft.fft(a + [0] * (n - len(a)))
+    fb = np.fft.fft(b + [0] * (n - len(b)))
+    fc = fa * fb
+    c = np.fft.ifft(fc).real
+    return [int(round(x)) for x in c[:total_len]]
+def main():
+    print("多项式乘法（使用 FFT）")
+    print("请输入第一个多项式的系数列表，例如 [1,2,3]：")
+    a = eval(input().strip())
+    print("请输入第二个多项式的系数列表：")
+    b = eval(input().strip())
+    c = poly_mul_fft(a, b)
+    print("乘积系数：", c)
+if __name__ == "__main__":
+    main()
+\end{lstlisting}
+\end{document}

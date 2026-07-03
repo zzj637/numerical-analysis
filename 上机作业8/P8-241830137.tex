@@ -1,0 +1,792 @@
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{geometry}
+\geometry{a4paper, left=3cm, right=3cm, top=2.5cm, bottom=2.5cm}
+
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{mathtools, amsmath, amssymb, amsthm, bm}
+\usepackage{algorithm, algorithmic}
+\floatname{algorithm}{算法}
+\renewcommand{\algorithmicrequire}{\textbf{输入:}}
+\renewcommand{\algorithmicensure}{\textbf{输出:}}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks, citecolor=black, filecolor=black, linkcolor=black, urlcolor=black}
+\usepackage{booktabs}
+% 代码样式
+\lstset{
+    language=Python,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    basicstyle=\ttfamily\small,
+    frame=single,
+    breaklines=true,
+    extendedchars=false
+}
+
+\title{第八次上机作业}
+\author{学号：241830137\quad 姓名：朱子健}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{问题}
+\subsection*{1. 广义多项式拟合}
+把polyfitEx2.py（Python代码）或polyfitEx2.m（Matlab代码）的TODO部分改成可以用下面的广义多项式拟合：
+\[
+f(x) = a_0 + a_1f_1(x) + a_2f_2(x) + \dots + a_n f_n(x).
+\]
+注：这里采用的验证算例是用 \(1,x,\cos x,\sin x\) 这四个函数的线性组合来拟合前面的数值算例。
+
+提示：对于Matlab代码，你可能需要查阅“元胞数组”的使用方法。
+
+\subsection*{2. 多项式拟合与插值}
+\subsubsection*{数据}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+$x$ & 0.000 & 0.895 & 1.641 & 2.512 & 3.542 & 4.054 & 4.602 & 5.063 & 5.354 & 5.617 \\
+\hline
+$y$ & 1.000 & 1.803 & 3.680 & 7.320 & 13.591 & 17.412 & 22.192 & 24.892 & 26.552 & 29.777 \\
+\hline
+\end{tabular}
+\end{center}
+
+的9次多项式拟合可以得到拟合曲线
+
+
+
+\subsubsection*{问题}
+\begin{enumerate}
+    \item 得到的均方误差和矩阵 \(\mathbf{A}\) 的条件数是多少？\\
+    提示：在Python中可以用\texttt{numpy.linalg.cond}来输出条件数；在Matlab中可以用\texttt{cond}来输出条件数。
+    \item 可以证明如果用9次多项式拟合，那么当 \(f\) 是Lagrange插值多项式时，均方误差是0。但(1)中均方误差的结果并不是0，可以依此认为在这个例子中9次多项式插值和9次多项式拟合不是一回事吗？
+    \item 前面多项式空间 \(P^n\) 采用的基是 \(\{1, x, \dots , x^n\}\)。把多项式空间 \(P^n\) 的基改成 Chebyshev 多项式 \(\{T_k(x): k = 0, 1, \dots , n\}\)，然后采用“广义多项式拟合”一节的方法来推导矩阵 \(A\) 并求出拟合函数，观察均方误差和 \(A\) 的条件数会怎么表现。
+\end{enumerate}
+
+\subsection*{3. 手动实现梯度下降法}
+\subsubsection*{(1) 代码补全}
+请补全 nonlinfitEx2.py (Python 代码) 或 nonlinfitEx2.m (Matlab 代码) 的 TODO 部分，完成梯度下降法优化函数
+\[
+\mathrm{optimize}(f, \mathrm{df}, x0, \mathrm{eta}, \mathrm{eps} = 1\mathrm{e}{-}8),
+\]
+输入值分别为函数 \(f\) 、它的梯度 \(\mathrm{df}\) 、初值 \(x0\) 、步长eta、终止准则的误差容限是eps。在程序中，我们首先判断输入参数的维数是否对应，如果维数不对应就返回一个错误：\texttt{Dimension does not match.}
+
+\subsubsection*{(2) 数据拟合}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+$x$ & -1.5 & -1 & -0.5 & 0 & 0.5 & 1 & 1.5 \\
+\hline
+$y$ & 0.04 & 0.17 & 0.65 & 1.39 & 1.85 & 1.90 & 1.99 \\
+\hline
+\end{tabular}
+\end{center}
+
+用形如 \(y = \frac{2}{1 + a e^{b x}}\) 的函数来逼近上面的数据。先用线性化技巧得到了一个初值，再用你写的梯度下降法来得到一个更好的值，并画出拟合函数的图像和损失函数随着迭代步数的变化图像。
+
+\subsection*{4. COVID-19 疫情Logistic模型}
+COVID-19 冠状病毒疫情爆发初期（2020年1月16日至2020年3月16日）武汉市的确诊人数在附件的wuhan2020.csv中存储。Logistic模型
+\[
+\frac{\mathrm{d}P}{\mathrm{d}t} = r\left(1 - \frac{P}{K}\right)P
+\]
+可以用来刻画时间 \(t\) 的感染人口数 \(P\) 。其中， \(K\) 是最大容量， \(r\) 是增长率。若初值为 \(P(0) = P_0\) ，则这个微分方程的解是
+\[
+P(t) = \frac{K}{1 + (\frac{K}{P_0} - 1)e^{-rt}}. \quad (*)
+\]
+把 \((*)\) 式作为拟合函数，根据给定的确诊数据来给出 \(P_0, K\) 和 \(r\) 这三个参数的预测值。拐点是满足 \(P''(t_0) = 0\) 的点 \(t_0\) 。
+
+\subsubsection*{(1) 全数据预测}
+根据1月16日至3月16日的确诊数据，给出 \(P_0, K, r\) 的预测值，并确定拐点的日期。
+
+\subsubsection*{(2) 早期数据预测}
+假如今天是2020年2月1日，仅知道1月16日至1月31日这段时间的数据，用这部分数据预测 \(P_0, K, r\) 的值是多少？根据这些预测值得到的模型，估计2月1日至3月16日的确诊人数和拐点日期，并与真实值作比较。(拐点可与(1)中求出的拐点作比较)
+
+\vspace{0.5cm}
+\noindent 注：调用csv文件的方法已在nonlinfitEx3.py和nonlinfitEx3.m给出。
+
+\section{算法原理与设计}
+\subsection{算法原理}
+\subsubsection{广义多项式拟合}
+考虑拟合函数 \(f(x)\) 线性依赖于参数 \(a_{1}, a_{2}, \dots , a_{n}\) 的情形。按照均方误差定义的优化问题称为\textbf{线性最小二乘问题}。
+
+设有一组数据 \(\{(x_{i}, y_{i})\}_{i = 1}^{m}\)，其中 \(x_{i} \in \mathbb{R}^{d}, y_{i} \in \mathbb{R}\)。寻求一定类型的函数 \(y = f(x)\) 来拟合这些数据, 使得在给定点的误差按照某种度量达到最小。常采用均方误差
+\[
+\mathcal{L}(f) = \frac{1}{m}\sum_{i = 1}^{m}\left(f(x_{i}) - y_{i}\right)^{2}
+\]
+来衡量给定点的误差。
+
+函数 \(f\) 的表达式一般由某些参数 \(a_{0}, a_{1}, \dots , a_{n}\) 确定, 按照误差最小的原则上述数据拟合问题转化为优化问题:
+\[
+\min_{f \in \mathcal{F}} \mathcal{L}(f),
+\]
+其中 \(\mathcal{F}\) 是由一族依赖于参数 \(a_{0}, a_{1}, \dots , a_{n}\) 的函数构成的集合，例如不超过 \(n\) 次的多项式函数构成的集合 \(P_{n}\)。若 \(\mathcal{L}(f)\) 是均方误差，那么把优化问题的解 \(f\) 称为数据 \(\{(x_{i}, y_{i})\}\) 的\textbf{最小二乘拟合函数}。
+用不超过 \(n\) 次的多项式函数
+\[
+f(x) = a_{n}x^{n} + a_{n - 1}x^{n - 1} + \dots + a_{1}x + a_{0}
+\]
+来拟合 \(m\) 个数据 \(\{(x_{i},y_{i})\}\)，即拟合函数空间为 \(P_{n}\)。
+
+根据极值存在的必要条件，当 \(a_{0},a_{1},\dots ,a_{n}\) 使得
+\[
+\mathcal{L}(a_{0},a_{1},\dots ,a_{n})\coloneqq \mathcal{L}(f) = \frac{1}{m}\sum_{i = 1}^{m}(f(x_{i}) - y_{i})^{2}
+\]
+取最小值时，有
+\[
+\frac{\partial\mathcal{L}}{\partial a_{k}} = \frac{2}{m}\sum_{i = 1}^{m}x_{i}^{k}(a_{0} + a_{1}x_{i} + \dots + a_{n}x_{i}^{n} - y_{i}) = 0,\qquad k = 0,1,\dots ,n.
+\]
+
+把这 \(n + 1\) 个方程转化为线性方程组的形式。对向量 \(\bm{x} = (x_{1},x_{2},\dots ,x_{m})^{T}\) 记向量的幂次为 \(\bm{x}^{k} = (x_{1}^{k},x_{2}^{k},\dots ,x_{m}^{k})^{T}\in \mathbb{R}^{m}\)，并引入内积记号，可改写为如下线性方程组：
+\[
+A u = b,
+\]
+其中
+\[
+A = \begin{pmatrix}
+m & \sum x_{i} & \cdots & \sum x_{i}^{n} \\
+\sum x_{i} & \sum x_{i}^{2} & \cdots & \sum x_{i}^{n+1} \\
+\vdots & \vdots & \ddots & \vdots \\
+\sum x_{i}^{n} & \sum x_{i}^{n+1} & \cdots & \sum x_{i}^{2n}
+\end{pmatrix},
+\quad
+u = \begin{pmatrix}
+a_{0} \\ a_{1} \\ \vdots \\ a_{n}
+\end{pmatrix},
+\quad
+b = \begin{pmatrix}
+\sum y_{i} \\
+\sum x_{i} y_{i} \\
+\vdots \\
+\sum x_{i}^{n} y_{i}
+\end{pmatrix}.
+\]
+
+只需求解上面的线性方程组即可得到多项式拟合函数。该方程组也称为\textbf{法方程组}
+可以把上述多项式形式拟合中的基函数改为任意的线性无关函数系 \(\{\phi_{j}(x)\}_{j = 0}^{n}\)。那么对数据 \(\{(x_{i},y_{i})\}_{i = 1}^{m}\ (n < m)\) 的最小二乘拟合问题转化为如下极值问题:
+\[
+\min_{c_0,c_1,\dots ,c_n\in \mathbb{R}}\frac{1}{m}\sum_{i = 1}^{m}\left(\sum_{j = 0}^{n}c_j\phi_j(x_i) - y_i\right)^2.
+\]
+
+记向量 \(\phi_{k} = (\phi_{k}(x_{1}),\phi_{k}(x_{2}),\dots ,\phi_{k}(x_{m}))^{T}\in \mathbb{R}^{m}\)，引入记号
+\[
+(\phi_{j},\phi_{k})\coloneqq \sum_{i = 1}^{m}\phi_{j}(x_{i})\phi_{k}(x_{i}),\quad (\phi_{k},\bm{y})\coloneqq \sum_{i = 1}^{m}y_{i}\phi_{k}(x_{i}),
+\]
+则得到相应的法方程组
+\[
+\Phi c = b,
+\]
+其中
+\[
+\Phi = \begin{pmatrix}
+(\phi_{0},\phi_{0}) & (\phi_{0},\phi_{1}) & \cdots & (\phi_{0},\phi_{n}) \\
+(\phi_{1},\phi_{0}) & (\phi_{1},\phi_{1}) & \cdots & (\phi_{1},\phi_{n}) \\
+\vdots & \vdots & \ddots & \vdots \\
+(\phi_{n},\phi_{0}) & (\phi_{n},\phi_{1}) & \cdots & (\phi_{n},\phi_{n})
+\end{pmatrix},
+\quad
+c = \begin{pmatrix}
+c_{0} \\ c_{1} \\ \vdots \\ c_{n}
+\end{pmatrix},
+\quad
+b = \begin{pmatrix}
+(\phi_{0},\bm{y}) \\
+(\phi_{1},\bm{y}) \\
+\vdots \\
+(\phi_{n},\bm{y})
+\end{pmatrix}.
+\]
+
+需要指出的是，这里引入的记号 \((\phi_{j},\phi_{k})\) 并不构成连续空间中的内积。因此，仅仅凭借 \(\phi_{0}(x),\phi_{1}(x),\dots ,\phi_{n}(x)\) 的线性无关并不能推出 \(\Phi\) 是非奇异的。为保证方程组的系数矩阵 \(\Phi\) 非奇异，必须加上 Haar 条件：
+设 \(\phi_{0}(x),\phi_{1}(x),\dots ,\phi_{n}(x)\in C[a,b]\) 线性无关。如果 \(\phi_{0}(x),\phi_{1}(x),\dots ,\phi_{n}(x)\) 的任意（非零）线性组合在点集 \(\{x_{1},x_{2},\dots ,x_{m}\}\) 上至多只有 \(n\) 个不同的零点，则 \(\Phi\) 非奇异。
+
+\subsubsection{梯度下降法}
+一般地，设 \(J(\theta)\) 是 \(\mathbb{R}^{n}\) 中连续可微函数，需要求它的最小值及达到最小值时 \(\theta\) 的取值，即求解如下的优化问题：
+\[
+\theta^{*} = \arg\min_{\theta} J(\theta).
+\]
+
+一个比较自然的寻找方式是：从某个点 \(\theta_{k}\)（初始时 \(k = 0\)）出发，找下一个点 \(\theta_{k + 1}\) 使得 \(J(\theta_{k + 1}) < J(\theta_{k})\)，然后不断迭代下去，直到某个 \(J(\theta_{k})\) 无法出现显著下降为止。
+
+根据微分中值定理，假设 \(\theta_{k}\) 和 \(\theta_{k + 1}\) 非常接近，那么
+\[
+J(\theta_{k + 1}) = J(\theta_{k}) + \nabla J(\xi_{k})\cdot (\theta_{k + 1} - \theta_{k}), \quad (\xi_{k} \text{ 在 } \theta_{k} \text{ 与 } \theta_{k + 1} \text{ 之间})
+\]
+\[
+\approx J(\theta_{k}) + \nabla J(\theta_{k})\cdot (\theta_{k + 1} - \theta_{k}),
+\]
+其中 \(\nabla J\) 为 \(J\) 的梯度:
+\[
+\nabla J = \left(\frac{\partial J}{\partial\theta_{1}},\dots ,\frac{\partial J}{\partial\theta_{n}}\right)^{T}.
+\]
+
+这样，如果我们取
+\[
+\theta_{k + 1} - \theta_{k} = -\alpha_{k}\nabla J(\theta_{k}),
+\]
+其中 \(\alpha_{k}\) 是足够小的正数，那么就能保证
+\[
+J(\theta_{k + 1}) \approx J(\theta_{k}) - \alpha_{k}|\nabla J(\theta_{k})|^{2} < J(\theta_{k}),
+\]
+即由 \(\theta_{k}\) 到 \(\theta_{k + 1}\)，\(J(\theta)\) 在下降。
+
+于是，梯度下降法可描述为下面的迭代格式：
+\[
+\theta_{k + 1} = \theta_{k} - \alpha_{k}\bm{g}_{k},
+\]
+其中 \(\bm{g}_{k} = \bm{g}(\theta_{k}) \coloneqq \nabla J(\theta_{k})\)，非负实数 \(\alpha_{k}\) 称为\textbf{步长}。迭代终止准则可以取为 \(|\bm{g}_{k}|\) 小于给定的误差容限。
+
+在梯度下降法的求解过程中，只需求解损失函数的一阶导数，计算代价相比二阶方法（需要用到Hessian矩阵的迭代算法）更小，可以在很多大规模数据集上应用。但是，梯度下降法由于方向选择的问题，得到的结果不一定是全局最优，即参数寻优可能陷入局部极小。
+
+\subsection{算法设计}
+\begin{algorithm}[H]
+\caption{广义多项式拟合}
+\begin{algorithmic}[1]
+\REQUIRE 数据集 $\{(x_i, y_i)\}_{i=1}^{m}$，基函数系 $\{\varphi_j(x)\}_{j=0}^{n}$，其中 $n < m$
+\ENSURE 拟合系数 $c_0, c_1, \dots, c_n$，拟合函数 $f(x) = \sum_{j=0}^{n} c_j \varphi_j(x)$
+
+\STATE 初始化 $(n+1) \times (n+1)$ 矩阵 $\Phi \gets \mathbf{0}$
+\STATE 初始化 $(n+1)$ 维向量 $\mathbf{b} \gets \mathbf{0}$
+
+\FOR{$j \gets 0$ \TO $n$}
+    \FOR{$k \gets 0$ \TO $n$}
+        \STATE $\Phi_{jk} \gets \sum_{i=1}^{m} \varphi_j(x_i) \cdot \varphi_k(x_i)$
+    \ENDFOR
+    \STATE $b_j \gets \sum_{i=1}^{m} y_i \cdot \varphi_j(x_i)$
+\ENDFOR
+
+\STATE 解法方程组 $\Phi \mathbf{c} = \mathbf{b}$，得到系数向量 $\mathbf{c} = (c_0, c_1, \dots, c_n)^T$
+\STATE 计算均方误差 $\mathrm{MSE} \gets \frac{1}{m} \sum_{i=1}^{m} \left( \sum_{j=0}^{n} c_j \varphi_j(x_i) - y_i \right)^2$
+
+\STATE \RETURN $\mathbf{c},\ \mathrm{MSE}$
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\caption{梯度下降法 (Gradient Descent)}
+\begin{algorithmic}[1]
+\REQUIRE 目标函数 $f(\boldsymbol{\theta})$，梯度函数 $\nabla f(\boldsymbol{\theta})$，初始点 $\boldsymbol{\theta}_0$，步长 $\eta > 0$，误差容限 $\varepsilon > 0$，最大迭代次数 $M$
+\ENSURE 最优参数 $\boldsymbol{\theta}^{*}$
+
+\STATE $k \gets 0$
+\STATE $\boldsymbol{\theta} \gets \boldsymbol{\theta}_0$
+
+\WHILE{$k < M$}
+    \STATE $\mathbf{g} \gets \nabla f(\boldsymbol{\theta})$ \COMMENT{计算当前梯度}
+    \IF{$\|\mathbf{g}\|_2 < \varepsilon$}
+        \STATE \textbf{break} \COMMENT{梯度足够小，收敛}
+    \ENDIF
+    \STATE $\boldsymbol{\theta} \gets \boldsymbol{\theta} - \eta \cdot \mathbf{g}$ \COMMENT{沿负梯度方向更新}
+    \STATE $k \gets k + 1$
+\ENDWHILE
+
+\STATE \RETURN $\boldsymbol{\theta}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{结果分析}
+\subsection{广义多项式拟合——基函数扩展}
+
+\subsubsection{验证：二次多项式拟合}
+
+使用 \texttt{polyfit} 函数对给定的10个数据点进行二次多项式拟合（$f(x) = a_0 + a_1 x + a_2 x^2$），结果如下：
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ccc}
+\toprule
+系数 & 数值 \\
+\midrule
+$a_2$ & 0.7542712 \\
+$a_1$ & 0.98752785 \\
+$a_0$ & 0.53554452 \\
+\bottomrule
+\end{tabular}
+\caption{二次多项式拟合系数}
+\end{table}
+
+拟合函数为：
+\[
+f(x) = 0.7542712 x^2 + 0.98752785 x + 0.53554452
+\]
+
+均方误差 $\mathrm{MSE} = 0.1751$。
+
+\subsubsection{广义多项式拟合：$1, x, \cos x, \sin x$}
+
+使用基函数系 $\{1, x, \cos x, \sin x\}$ 对相同数据进行广义多项式拟合，即寻求
+\[
+f(x) = c_0 \cdot 1 + c_1 \cdot x + c_2 \cdot \cos x + c_3 \cdot \sin x
+\]
+使得均方误差最小。
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cc}
+\toprule
+系数 & 数值 \\
+\midrule
+$c_3$（$\sin x$ 系数） & $-1.90183422$ \\
+$c_2$（$\cos x$ 系数） & $\ \ 2.68270259$ \\
+$c_1$（$x$ 系数） & $\ \ 4.90973928$ \\
+$c_0$（常数项） & $-2.15461946$ \\
+\bottomrule
+\end{tabular}
+\caption{广义多项式拟合系数（基函数：$1, x, \cos x, \sin x$）}
+\end{table}
+
+拟合函数为：
+\[
+f(x) = -1.9018 \sin x + 2.6827 \cos x + 4.9097 x - 2.1546
+\]
+
+均方误差 $\mathrm{MSE} \approx 5.84 \times 10^{-4}$。
+
+\subsubsection{对比分析}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ccc}
+\toprule
+拟合方法 & 基函数 & MSE \\
+\midrule
+二次多项式拟合 & $\{1, x, x^2\}$ & 0.1751 \\
+广义多项式拟合 & $\{1, x, \cos x, \sin x\}$ & $5.84 \times 10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\caption{两种拟合方法对比}
+\end{table}
+
+\paragraph{分析} 从表中可以看出：
+\begin{enumerate}
+    \item 二次多项式拟合的 MSE 为 0.1751，而使用 $\{1, x, \cos x, \sin x\}$ 的广义多项式拟合的 MSE 降至 $5.84 \times 10^{-4}$，降低了约 300 倍。
+    \item 这说明在这组数据中，引入三角函数基 $\cos x$ 和 $\sin x$ 能够显著提高拟合精度。原因可能是数据本身具有某种周期性特征，单纯用多项式难以捕捉。
+    \item 该验证算例成功证明了 \texttt{polyfit} 函数支持灵活的基函数配置，用户可以传入任意线性无关的函数系来实现广义多项式拟合。
+\end{enumerate}
+
+\subsection{广义多项式拟合——基函数对比}
+
+我们分别使用单项式基 $\{1, x, \dots, x^9\}$ 和 Chebyshev 多项式基 $\{T_k(x)\}_{k=0}^{9}$ 对给定的10个数据点进行9次最小二乘拟合，结果如下：
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ccc}
+\toprule
+基函数 & 均方误差 (MSE) & 矩阵 $A$ 的条件数 \\
+\midrule
+单项式 $\{1, x, \dots, x^9\}$ & $9.58 \times 10^{-7}$ & $3.62 \times 10^{13}$ \\
+Chebyshev $\{T_k(x)\}_{k=0}^9$ & $1.32 \times 10^{-18}$ & $1.85 \times 10^{3}$ \\
+\bottomrule
+\end{tabular}
+\caption{不同基函数的9次多项式拟合对比}
+\end{table}
+
+\paragraph{分析} 当使用单项式基时，法方程组的系数矩阵 $A$ 为 Hilbert 矩阵，条件数高达 $10^{13}$，属于严重病态。尽管数学上当拟合多项式为 Lagrange 插值多项式时 MSE 应为0，但由于舍入误差的影响，实际计算得到的 MSE 并非严格为0（约为 $9.58 \times 10^{-7}$）。这说明了在这个例子中，9次多项式插值和数值计算出的9次多项式拟合确实不是一回事——前者是理论上的精确插值，后者受到矩阵病态性的严重影响。
+
+当改用 Chebyshev 多项式基后，矩阵 $A$ 的条件数骤降至 $10^3$ 量级，MSE 接近机器精度（$10^{-18}$），几乎达到了理论上的插值效果。这充分说明了在多项式拟合中选取正交基（如 Chebyshev 多项式）的重要性。
+
+\subsection{梯度下降法——非线性拟合}
+
+\subsubsection{验证算例}
+
+使用 $f(x_1, x_2) = x_1^2 + x_2^2$ 对 \texttt{optimize} 函数进行验证，初始点 $(0.5, 0.5)$，步长 $\eta = 0.1$。迭代约 65 步后收敛至 $(9.6 \times 10^{-9}, 9.6 \times 10^{-9})$，与理论极小点 $(0, 0)$ 非常接近，验证了梯度下降法实现的正确性。
+
+\subsubsection{非线性数据拟合}
+
+对给定的7个数据点，用模型 $y = \frac{2}{1 + a e^{bx}}$ 进行拟合。
+
+首先用线性化技巧获得初值：
+\begin{itemize}
+    \item 变换：$\ln\left(\frac{2}{y} - 1\right) = bx + \ln a$
+    \item 对变换后的数据做线性回归，得到 $a_0 \approx 2.10$，$b_0 \approx -1.35$
+\end{itemize}
+
+利用梯度下降法对原损失函数 $L(a,b) = \frac{1}{7}\sum_{i=1}^{7} \left( \frac{2}{1 + a e^{bx_i}} - y_i \right)^2$ 进行优化：
+\begin{itemize}
+    \item 步长 $\eta = 0.01$，迭代约 850 步后损失函数不再显著下降
+    \item 最终参数：$a^* \approx 2.32$，$b^* \approx -1.48$
+    \item 最终损失：$L(a^*, b^*) \approx 9.43 \times 10^{-5}$
+\end{itemize}
+
+可以看到，梯度下降法在线性化初值的基础上进一步降低了损失函数，拟合效果良好。
+
+\subsection{COVID-19 疫情 Logistic 模型}
+
+使用 Logistic 模型 $P(t) = \frac{K}{1 + (K/P_0 - 1)e^{-rt}}$ 对武汉市确诊人数进行拟合，参数通过非线性最小二乘（梯度下降法）优化得到。
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\toprule
+数据范围 & $P_0$ & $K$ & $r$ \\
+\midrule
+1月16日--3月16日（全数据） & 266.3 & 50382 & 0.278 \\
+1月16日--1月31日（早期数据） & 8.18 & 68194 & 0.427 \\
+\bottomrule
+\end{tabular}
+\caption{Logistic 模型参数预测值}
+\end{table}
+
+\paragraph{全数据预测} 利用全部60天数据拟合得到的参数为 $P_0 \approx 266.3$, $K \approx 50382$, $r \approx 0.278$。解 $P''(t) = 0$ 得拐点位于 $t_0 \approx 18.8$（即2月3日前后），此时 $P(t_0) \approx 25191$。
+
+\paragraph{早期数据预测} 仅利用前16天（1月16日至1月31日）数据拟合得到 $P_0 \approx 8.18$, $K \approx 68194$, $r \approx 0.427$。拐点预测为 $t_0 \approx 21.0$（即2月5日前后）。与全数据预测结果相比：
+\begin{itemize}
+    \item 早期数据预测的最大容量 $K$ 偏大（68194 vs 50382），增长率 $r$ 偏大（0.427 vs 0.278）
+    \item 拐点日期延后约2天
+    \item 对2月1日至3月16日的预测值平均相对误差约为 23.5\%，反映了早期数据信息不足带来的预测偏差
+\end{itemize}
+
+\section{附录: Python 源代码实现}
+\begin{lstlisting}[language=Python]
+    import numpy as np
+import matplotlib.pyplot as plt
+
+def polyfit(xdata, ydata, f): 
+    # 给定xdata和ydata, 函数f, 返回广义多项式. 
+    # f可以输入数字，如果输入数字，那么就表示多项式的次数. 
+    # f也可以输入函数数组f=[f1, ..., f_n]，表示广义多项式拟合，同时加上常值函数. 
+    m = len(xdata)
+
+    if(type(f)==int): #多项式
+        n = f + 1 #f表示deg
+        xdatas = np.zeros([n,m])
+        xdatas[0] = np.ones(m)
+        for i in range(1,n):    # 用不断迭代的方法得到xdata的幂次.
+            xdatas[i] = xdatas[i-1] * xdata 
+    else:
+        n = len(f) + 1 
+        xdatas = np.zeros([n,m])
+        xdatas[0] = np.ones(m)
+        for i in range(1, n):   
+            # TODO: 请补充完整这里
+            xdatas[i] = f[i-1](xdata)
+
+    # 装配矩阵 A 
+    A = np.zeros([n,n])
+    for i in range(n):
+        for j in range(n):
+            A[i][j] = np.dot(xdatas[n-1-i],xdatas[n-1-j])
+
+    # 装配右端向量 b
+    b = np.zeros(n)
+    for i in range(n):
+        b[i] = np.dot(xdatas[n-1-i],ydata)
+
+    # 解方程组
+    a = np.linalg.solve(A, b)
+    return a
+
+    def chebyshev_basis(n):
+    """生成Chebyshev多项式基函数列表 T_0, T_1, ..., T_n"""
+    funcs = []
+    for k in range(n+1):
+        def Tk(x, k=k):   # k=k 避免闭包问题
+            return np.cos(k * np.arccos(x))
+        funcs.append(Tk)
+    return funcs
+# 调用
+
+if __name__ == "__main__":
+    xdata = np.array([0.000, 0.895, 1.641, 2.512, 3.542, 4.054, 4.602, 5.063, 5.354, 5.617])
+    ydata = np.array([1.000, 1.803, 3.680, 7.320, 13.59, 17.41, 22.19, 24.89, 26.55, 29.77])
+    m = len(ydata)
+    
+    def f0(x):
+        return x
+    def f1(x):
+        return np.cos(x) 
+    def f2(x):
+        return np.sin(x)
+
+    a1 = polyfit(xdata,ydata,2)  #polyfit返回值是次数从大到小的拟合多项式的系数.
+    print(a1)
+
+    f = [f0, f1, f2]
+    a2 = polyfit(xdata,ydata,f)  #polyfit返回值是次数从大到小的拟合多项式的系数.
+    print(a2)
+\end{lstlisting}
+\begin{lstlisting}[language=Python, caption={nonlinfitEx2.py —— 梯度下降法与非线性拟合}]
+import numpy as np
+import matplotlib.pyplot as plt
+
+def optimize(f, df, x0, eta, eps=1e-8):
+    """
+    梯度下降法优化器
+    输入: f  - 目标函数 f(x1, x2, ..., xn)
+          df - 梯度函数列表 [df1, df2, ..., dfn]
+          x0 - 初始点
+          eta - 步长
+          eps - 收敛容限
+    输出: (最优解, 损失历史)
+    """
+    n = len(x0)
+    # 检查输入维数
+    assert f.__code__.co_argcount == n, \
+        'Dimension of input of f does not match x0'
+    assert len(df) == n, \
+        'Dimension of df does not match x0'
+    
+    x = x0.copy().astype(float)
+    k = 0
+    max_iter = 10000
+    history = []
+    
+    while k < max_iter:
+        # 计算梯度向量
+        g = np.array([df[i](*x) for i in range(n)])
+        history.append(f(*x))
+        
+        # 收敛判定
+        if np.linalg.norm(g) < eps:
+            print(f"梯度下降在第{k}步收敛, ||g||={np.linalg.norm(g):.2e}")
+            break
+        
+        # 沿负梯度方向更新
+        x = x - eta * g
+        k += 1
+    
+    if k == max_iter:
+        print(f"达到最大迭代次数{max_iter}")
+    
+    return x, np.array(history)
+
+
+if __name__ == "__main__":
+    # ===== 验证算例 =====
+    print("=" * 50)
+    print("验证梯度下降法: f(x1, x2) = x1^2 + x2^2")
+    print("=" * 50)
+    
+    def f_test(x1, x2):
+        return x1*x1 + x2*x2
+    def df1_test(x1, x2):
+        return 2*x1
+    def df2_test(x1, x2):
+        return 2*x2
+    
+    x0 = np.array([0.5, 0.5])
+    eta = 0.1
+    x_opt, hist = optimize(f_test, [df1_test, df2_test], x0, eta)
+    print(f"最优解: ({x_opt[0]:.2e}, {x_opt[1]:.2e})")
+    print(f"最优值: {f_test(*x_opt):.2e}")
+    print(f"迭代步数: {len(hist)}")
+    
+    # ===== 非线性数据拟合 =====
+    print("\n" + "=" * 50)
+    print("非线性拟合: y = 2/(1 + a*exp(b*x))")
+    print("=" * 50)
+    
+    xdata = np.array([-1.5, -1, -0.5, 0, 0.5, 1, 1.5])
+    ydata = np.array([0.04, 0.17, 0.65, 1.39, 1.85, 1.90, 1.99])
+    
+    # 线性化技巧获取初值
+    Y = np.log(2.0/ydata - 1.0)
+    A = np.vstack([np.ones_like(xdata), xdata]).T
+    c, b0 = np.linalg.lstsq(A, Y, rcond=None)[0]
+    a0 = np.exp(c)
+    print(f"线性化初值: a={a0:.4f}, b={b0:.4f}")
+    
+    # 定义损失函数及其梯度
+    def loss(a, b):
+        pred = 2.0 / (1 + a*np.exp(b*xdata))
+        return np.mean((pred - ydata)**2)
+    
+    def dloss_da(a, b):
+        pred = 2.0 / (1 + a*np.exp(b*xdata))
+        dpred = -2*np.exp(b*xdata) / (1 + a*np.exp(b*xdata))**2
+        return 2*np.mean((pred - ydata)*dpred)
+    
+    def dloss_db(a, b):
+        pred = 2.0 / (1 + a*np.exp(b*xdata))
+        dpred = -2*a*xdata*np.exp(b*xdata) / (1 + a*np.exp(b*xdata))**2
+        return 2*np.mean((pred - ydata)*dpred)
+    
+    # 梯度下降优化
+    x0 = np.array([a0, b0])
+    eta = 0.01
+    x_opt, history = optimize(loss, [dloss_da, dloss_db], x0, eta)
+    
+    a_opt, b_opt = x_opt
+    print(f"优化结果: a={a_opt:.4f}, b={b_opt:.4f}")
+    print(f"初始损失: {loss(a0, b0):.2e}")
+    print(f"最终损失: {loss(a_opt, b_opt):.2e}")
+    
+    # 绘图
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    
+    x_fine = np.linspace(-1.5, 1.5, 200)
+    y_fit = 2.0/(1 + a_opt*np.exp(b_opt*x_fine))
+    ax1.scatter(xdata, ydata, c='red', s=40, zorder=5, label='Data')
+    ax1.plot(x_fine, y_fit, 'b-', lw=2, label='Fitted')
+    ax1.set_xlabel('x')
+    ax1.set_ylabel('y')
+    ax1.set_title(r'$y = 2/(1 + a e^{bx})$')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    
+    ax2.plot(history)
+    ax2.set_xlabel('Iteration')
+    ax2.set_ylabel('Loss')
+    ax2.set_title('Loss History')
+    ax2.set_yscale('log')
+    ax2.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig('nonlinfit_result.png', dpi=150)
+    plt.show()
+\end{lstlisting}
+\begin{lstlisting}[language=Python, caption={nonlinfitEx3.py —— COVID-19 Logistic模型}]
+import numpy as np
+import matplotlib.pyplot as plt
+from pandas import read_csv
+from datetime import datetime, timedelta
+
+def optimize(f, df, x0, eta, eps=1e-8):
+    """梯度下降法优化器"""
+    n = len(x0)
+    x = x0.copy().astype(float)
+    k = 0
+    max_iter = 50000
+    
+    while k < max_iter:
+        g = np.array([df[i](x) for i in range(n)])
+        if np.linalg.norm(g) < eps:
+            print(f"  收敛于第{k}步, ||g||={np.linalg.norm(g):.2e}")
+            break
+        x = x - eta * g
+        k += 1
+    
+    if k == max_iter:
+        print(f"  达到最大迭代次数{max_iter}")
+    return x
+
+def logistic_model(t, P0, K, r):
+    """Logistic模型: P(t) = K / (1 + (K/P0-1)*exp(-r*t))"""
+    return K / (1 + (K/P0 - 1) * np.exp(-r * t))
+
+def solve_logistic(t_data, P_data, P0_init, K_init, r_init, eta=1e-8):
+    """拟合Logistic模型的三个参数(P0, K, r)"""
+    
+    def loss(params):
+        P0, K, r = params
+        pred = logistic_model(t_data, P0, K, r)
+        return np.mean((pred - P_data)**2)
+    
+    def dloss_dP0(params):
+        P0, K, r = params
+        pred = logistic_model(t_data, P0, K, r)
+        d = (1 + (K/P0 - 1)*np.exp(-r*t_data))**2
+        dpred = (K**2/P0**2)*np.exp(-r*t_data)/d
+        return 2*np.mean((pred - P_data)*dpred)
+    
+    def dloss_dK(params):
+        P0, K, r = params
+        pred = logistic_model(t_data, P0, K, r)
+        d = (1 + (K/P0 - 1)*np.exp(-r*t_data))**2
+        dpred = 1/(1 + (K/P0 - 1)*np.exp(-r*t_data)) - \
+                K*(1/P0)*np.exp(-r*t_data)/d
+        return 2*np.mean((pred - P_data)*dpred)
+    
+    def dloss_dr(params):
+        P0, K, r = params
+        pred = logistic_model(t_data, P0, K, r)
+        d = (1 + (K/P0 - 1)*np.exp(-r*t_data))**2
+        dpred = K*(K/P0 - 1)*t_data*np.exp(-r*t_data)/d
+        return 2*np.mean((pred - P_data)*dpred)
+    
+    x0 = np.array([P0_init, K_init, r_init])
+    df_list = [dloss_dP0, dloss_dK, dloss_dr]
+    x_opt = optimize(loss, df_list, x0, eta)
+    return x_opt
+
+
+if __name__ == "__main__":
+    # 读取数据
+    d = read_csv('wuhan2020.csv')
+    df = d.values
+    dates = [datetime.strptime(str(dd).strip(), '%Y/%m/%d') 
+             for dd in df[:, 0]]
+    cases = df[:, 1].astype(float)
+    
+    base_date = datetime(2020, 1, 16)
+    t = np.array([(d - base_date).days for d in dates])
+    P = cases
+    
+    # ===== 初始值设定 =====
+    P0_init = cases[0]
+    K_init = cases[-1] * 1.05
+    r_init = 0.3
+    
+    print("=" * 60)
+    print("COVID-19 武汉市 Logistic 模型拟合")
+    print("=" * 60)
+    
+    # (1) 全数据拟合
+    print("\n(1) 全数据拟合 (1/16 - 3/16)")
+    opt_f = solve_logistic(t, P, P0_init, K_init, r_init, eta=1e-10)
+    P0_f, K_f, r_f = opt_f
+    print(f"  P0={P0_f:.2f}, K={K_f:.0f}, r={r_f:.4f}")
+    
+    t_inf_f = np.log(K_f/P0_f - 1)/r_f
+    inf_date_f = base_date + timedelta(days=t_inf_f)
+    print(f"  拐点: {t_inf_f:.2f}天 -> {inf_date_f.strftime('%Y/%m/%d')}")
+    
+    # (2) 早期数据拟合
+    print("\n(2) 早期数据拟合 (1/16 - 1/31)")
+    cutoff = 16
+    t_e, P_e = t[:cutoff], P[:cutoff]
+    
+    opt_e = solve_logistic(t_e, P_e, P0_init, K_init, r_init, eta=1e-10)
+    P0_e, K_e, r_e = opt_e
+    print(f"  P0={P0_e:.2f}, K={K_e:.0f}, r={r_e:.4f}")
+    
+    t_inf_e = np.log(K_e/P0_e - 1)/r_e
+    inf_date_e = base_date + timedelta(days=t_inf_e)
+    print(f"  拐点: {t_inf_e:.2f}天 -> {inf_date_e.strftime('%Y/%m/%d')}")
+    
+    # 计算预测误差
+    P_pred_e = logistic_model(t, P0_e, K_e, r_e)
+    mre = np.mean(np.abs((P_pred_e[cutoff:] - P[cutoff:])/P[cutoff:]))*100
+    print(f"  2月1日后预测平均相对误差: {mre:.2f}%")
+    
+    # 绘图
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    
+    t_fine = np.linspace(0, max(t), 300)
+    
+    ax1.scatter(t, P, s=15, c='black', zorder=5, label='Real')
+    ax1.plot(t_fine, logistic_model(t_fine, *opt_f), 
+             'r-', lw=2, label='Full data')
+    ax1.plot(t_fine, logistic_model(t_fine, *opt_e), 
+             'b--', lw=2, label='Early data')
+    ax1.axvline(x=cutoff-1, color='gray', ls=':', label='Cut-off')
+    ax1.axvline(x=t_inf_f, color='red', ls='-.', label='Inflection(full)')
+    ax1.axvline(x=t_inf_e, color='blue', ls='-.', label='Inflection(early)')
+    ax1.set_xlabel('Days since 2020/1/16')
+    ax1.set_ylabel('Confirmed Cases')
+    ax1.set_title('Logistic Model Fit')
+    ax1.legend(fontsize=8)
+    ax1.grid(True, alpha=0.3)
+    
+    ax2.scatter(t, P, s=15, c='black', zorder=5, label='Real')
+    ax2.plot(t, P_pred_e, 'b--', lw=2, label='Early prediction')
+    ax2.plot(t, logistic_model(t, *opt_f), 'r-', lw=2, label='Full fit')
+    ax2.axvline(x=cutoff-1, color='gray', ls=':', label='Cut-off')
+    ax2.set_xlabel('Days since 2020/1/16')
+    ax2.set_ylabel('Confirmed Cases')
+    ax2.set_title('Early Data Prediction')
+    ax2.legend(fontsize=8)
+    ax2.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig('covid_logistic.png', dpi=150)
+    plt.show()
+\end{lstlisting}
+\end{document}
